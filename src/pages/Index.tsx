@@ -41,6 +41,7 @@ import ReviewStep from '@/components/ReviewStep';
 
 interface SRSData {
   projectInfo: {
+    companyName: string;
     name: string;
     version: string;
     description: string;
@@ -77,6 +78,7 @@ const Index = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [srsData, setSrsData] = useState<SRSData>({
     projectInfo: {
+      companyName: '',
       name: '',
       version: '1.0',
       description: '',
@@ -158,7 +160,7 @@ const Index = () => {
   const validateCurrentStep = () => {
     switch (currentStep) {
       case 0:
-        return srsData.projectInfo.name && srsData.projectInfo.description && srsData.projectInfo.scope;
+        return srsData.projectInfo.companyName && srsData.projectInfo.name && srsData.projectInfo.description && srsData.projectInfo.scope;
       case 1:
         return srsData.functionalRequirements.userStories.some(story => story.trim()) &&
                srsData.functionalRequirements.systemFeatures.some(feature => feature.trim());
@@ -185,14 +187,18 @@ const Index = () => {
       
       // Company branding function
       const addHeader = (pageNumber: number) => {
-        // Company name at top of every page
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(100, 100, 100);
-        doc.text('SRS Generator Pro', pageWidth - margin, 15, { align: 'right' });
+        // Company name at top of every page - bold
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0, 0, 0);
+        const companyName = srsData.projectInfo.companyName || 'SRS Generator Pro';
+        doc.text(companyName, pageWidth - margin, 15, { align: 'right' });
         
         // Page number
         if (pageNumber > 1) {
+          doc.setFont(undefined, 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(100, 100, 100);
           doc.text(`Page ${pageNumber}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
         }
         
@@ -247,7 +253,7 @@ const Index = () => {
       checkPageSpace(60);
       doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(66, 139, 202); // Blue color for headings
+      doc.setTextColor(0, 0, 0); // Main headings in black
       doc.text('1. Project Information', margin, yPosition);
       yPosition += 15;
       
@@ -260,27 +266,43 @@ const Index = () => {
       doc.setFont(undefined, 'normal');
       doc.setTextColor(0, 0, 0);
       
+      if (srsData.projectInfo.companyName) {
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
+        doc.text('Company Name:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(srsData.projectInfo.companyName, margin + 35, yPosition);
+        yPosition += 10;
+      }
+      
       if (srsData.projectInfo.name) {
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Project Name:', margin, yPosition);
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         doc.text(srsData.projectInfo.name, margin + 35, yPosition);
         yPosition += 10;
       }
       
       if (srsData.projectInfo.version) {
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Version:', margin, yPosition);
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         doc.text(srsData.projectInfo.version, margin + 25, yPosition);
         yPosition += 10;
       }
       
       if (srsData.projectInfo.description) {
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Description:', margin, yPosition);
         yPosition += 8;
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         const descLines = doc.splitTextToSize(srsData.projectInfo.description, pageWidth - 2 * margin);
         doc.text(descLines, margin, yPosition);
         yPosition += descLines.length * 6 + 5;
@@ -289,9 +311,11 @@ const Index = () => {
       if (srsData.projectInfo.stakeholders) {
         checkPageSpace(30);
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Stakeholders:', margin, yPosition);
         yPosition += 8;
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         const stakeholderLines = doc.splitTextToSize(srsData.projectInfo.stakeholders, pageWidth - 2 * margin);
         doc.text(stakeholderLines, margin, yPosition);
         yPosition += stakeholderLines.length * 6 + 5;
@@ -300,9 +324,11 @@ const Index = () => {
       if (srsData.projectInfo.scope) {
         checkPageSpace(30);
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Scope:', margin, yPosition);
         yPosition += 8;
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         const scopeLines = doc.splitTextToSize(srsData.projectInfo.scope, pageWidth - 2 * margin);
         doc.text(scopeLines, margin, yPosition);
         yPosition += scopeLines.length * 6 + 15;
@@ -312,7 +338,7 @@ const Index = () => {
       checkPageSpace(60);
       doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(66, 139, 202);
+      doc.setTextColor(0, 0, 0); // Main headings in black
       doc.text('2. Functional Requirements', margin, yPosition);
       yPosition += 15;
       
@@ -325,7 +351,7 @@ const Index = () => {
       
       if (srsData.functionalRequirements.userStories.some(story => story.trim())) {
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(66, 139, 202);
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('User Stories:', margin, yPosition);
         yPosition += 8;
         doc.setTextColor(0, 0, 0);
@@ -345,7 +371,7 @@ const Index = () => {
       if (srsData.functionalRequirements.systemFeatures.some(feature => feature.trim())) {
         checkPageSpace(20);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(66, 139, 202);
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('System Features:', margin, yPosition);
         yPosition += 8;
         doc.setTextColor(0, 0, 0);
@@ -365,7 +391,7 @@ const Index = () => {
       if (srsData.functionalRequirements.businessRules.some(rule => rule.trim())) {
         checkPageSpace(20);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(66, 139, 202);
+        doc.setTextColor(66, 139, 202); // Sub-headings in blue
         doc.text('Business Rules:', margin, yPosition);
         yPosition += 8;
         doc.setTextColor(0, 0, 0);
@@ -386,7 +412,7 @@ const Index = () => {
       checkPageSpace(60);
       doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(66, 139, 202);
+      doc.setTextColor(0, 0, 0); // Main headings in black
       doc.text('3. Non-Functional Requirements', margin, yPosition);
       yPosition += 15;
       
@@ -410,7 +436,7 @@ const Index = () => {
         if (value) {
           checkPageSpace(25);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(66, 139, 202);
+          doc.setTextColor(66, 139, 202); // Sub-headings in blue
           doc.text(`${section.title}:`, margin, yPosition);
           yPosition += 8;
           doc.setFont(undefined, 'normal');
@@ -426,7 +452,7 @@ const Index = () => {
         checkPageSpace(60);
         doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(66, 139, 202);
+        doc.setTextColor(0, 0, 0); // Main headings in black
         doc.text('4. System Architecture', margin, yPosition);
         yPosition += 15;
         
@@ -439,7 +465,7 @@ const Index = () => {
         
         if (srsData.systemArchitecture.overview) {
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(66, 139, 202);
+          doc.setTextColor(66, 139, 202); // Sub-headings in blue
           doc.text('Architecture Overview:', margin, yPosition);
           yPosition += 8;
           doc.setFont(undefined, 'normal');
@@ -452,7 +478,7 @@ const Index = () => {
         if (srsData.systemArchitecture.components.some(comp => comp.trim())) {
           checkPageSpace(20);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(66, 139, 202);
+          doc.setTextColor(66, 139, 202); // Sub-headings in blue
           doc.text('System Components:', margin, yPosition);
           yPosition += 8;
           doc.setFont(undefined, 'normal');
@@ -472,7 +498,7 @@ const Index = () => {
         if (srsData.systemArchitecture.dataFlow) {
           checkPageSpace(20);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(66, 139, 202);
+          doc.setTextColor(66, 139, 202); // Sub-headings in blue
           doc.text('Data Flow:', margin, yPosition);
           yPosition += 8;
           doc.setFont(undefined, 'normal');
@@ -485,7 +511,7 @@ const Index = () => {
         if (srsData.systemArchitecture.interfaces) {
           checkPageSpace(20);
           doc.setFont(undefined, 'bold');
-          doc.setTextColor(66, 139, 202);
+          doc.setTextColor(66, 139, 202); // Sub-headings in blue
           doc.text('External Interfaces:', margin, yPosition);
           yPosition += 8;
           doc.setFont(undefined, 'normal');
@@ -505,7 +531,7 @@ const Index = () => {
         checkPageSpace(60);
         doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
-        doc.setTextColor(66, 139, 202);
+        doc.setTextColor(0, 0, 0); // Main headings in black
         doc.text('5. Constraints & Dependencies', margin, yPosition);
         yPosition += 15;
         
@@ -527,7 +553,7 @@ const Index = () => {
           if (constraints.some((constraint: string) => constraint.trim())) {
             checkPageSpace(20);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(66, 139, 202);
+            doc.setTextColor(66, 139, 202); // Sub-headings in blue
             doc.text(`${section.title}:`, margin, yPosition);
             yPosition += 8;
             doc.setFont(undefined, 'normal');
@@ -549,7 +575,8 @@ const Index = () => {
       // Footer on last page
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text('Generated by SRS Generator Pro', pageWidth / 2, pageHeight - 15, { align: 'center' });
+      const footerCompanyName = srsData.projectInfo.companyName || 'SRS Generator Pro';
+      doc.text(`Generated by ${footerCompanyName}`, pageWidth / 2, pageHeight - 15, { align: 'center' });
       doc.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       // Save the PDF
@@ -901,6 +928,19 @@ const ProjectInfoStep = ({ data, onChange }: {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
+          <Label htmlFor="companyName" className="text-sm font-medium">
+            Company Name *
+          </Label>
+          <Input
+            id="companyName"
+            placeholder="Enter your company name"
+            value={data.companyName}
+            onChange={(e) => onChange('companyName', e.target.value)}
+            className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+        
+        <div className="space-y-2">
           <Label htmlFor="projectName" className="text-sm font-medium">
             Project Name *
           </Label>
@@ -912,19 +952,19 @@ const ProjectInfoStep = ({ data, onChange }: {
             className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
           />
         </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="version" className="text-sm font-medium">
-            Version
-          </Label>
-          <Input
-            id="version"
-            placeholder="1.0"
-            value={data.version}
-            onChange={(e) => onChange('version', e.target.value)}
-            className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="version" className="text-sm font-medium">
+          Version
+        </Label>
+        <Input
+          id="version"
+          placeholder="1.0"
+          value={data.version}
+          onChange={(e) => onChange('version', e.target.value)}
+          className="transition-all duration-200 focus:ring-2 focus:ring-blue-500"
+        />
       </div>
       
       <div className="space-y-2">
