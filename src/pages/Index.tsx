@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,6 +29,13 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+
+// Import step components
+import FunctionalRequirementsStep from '@/components/FunctionalRequirementsStep';
+import NonFunctionalRequirementsStep from '@/components/NonFunctionalRequirementsStep';
+import SystemArchitectureStep from '@/components/SystemArchitectureStep';
+import ConstraintsStep from '@/components/ConstraintsStep';
+import ReviewStep from '@/components/ReviewStep';
 
 interface SRSData {
   projectInfo: {
@@ -366,7 +372,7 @@ const Index = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {/* Step Content will be rendered here */}
+                {/* Step Content */}
                 {currentStep === 0 && (
                   <ProjectInfoStep 
                     data={srsData.projectInfo}
@@ -376,6 +382,70 @@ const Index = () => {
                         projectInfo: { ...prev.projectInfo, [field]: value }
                       }))
                     }
+                  />
+                )}
+
+                {currentStep === 1 && (
+                  <FunctionalRequirementsStep
+                    data={srsData.functionalRequirements}
+                    onUpdateArray={(field, index, value) => 
+                      updateArrayItem('functionalRequirements', field, index, value)
+                    }
+                    onAddArrayItem={(field) => addArrayItem('functionalRequirements', field)}
+                    onRemoveArrayItem={(field, index) => 
+                      removeArrayItem('functionalRequirements', field, index)
+                    }
+                  />
+                )}
+
+                {currentStep === 2 && (
+                  <NonFunctionalRequirementsStep
+                    data={srsData.nonFunctionalRequirements}
+                    onChange={(field, value) =>
+                      setSrsData(prev => ({
+                        ...prev,
+                        nonFunctionalRequirements: { ...prev.nonFunctionalRequirements, [field]: value }
+                      }))
+                    }
+                  />
+                )}
+
+                {currentStep === 3 && (
+                  <SystemArchitectureStep
+                    data={srsData.systemArchitecture}
+                    onChange={(field, value) =>
+                      setSrsData(prev => ({
+                        ...prev,
+                        systemArchitecture: { ...prev.systemArchitecture, [field]: value }
+                      }))
+                    }
+                    onUpdateArray={(field, index, value) => 
+                      updateArrayItem('systemArchitecture', field, index, value)
+                    }
+                    onAddArrayItem={(field) => addArrayItem('systemArchitecture', field)}
+                    onRemoveArrayItem={(field, index) => 
+                      removeArrayItem('systemArchitecture', field, index)
+                    }
+                  />
+                )}
+
+                {currentStep === 4 && (
+                  <ConstraintsStep
+                    data={srsData.constraints}
+                    onUpdateArray={(field, index, value) => 
+                      updateArrayItem('constraints', field, index, value)
+                    }
+                    onAddArrayItem={(field) => addArrayItem('constraints', field)}
+                    onRemoveArrayItem={(field, index) => 
+                      removeArrayItem('constraints', field, index)
+                    }
+                  />
+                )}
+
+                {currentStep === 5 && (
+                  <ReviewStep
+                    data={srsData}
+                    onEditStep={(stepIndex) => setCurrentStep(stepIndex)}
                   />
                 )}
                 
