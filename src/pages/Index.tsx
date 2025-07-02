@@ -29,6 +29,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 
 // Import step components
 import FunctionalRequirementsStep from '@/components/FunctionalRequirementsStep';
@@ -170,6 +171,189 @@ const Index = () => {
                srsData.constraints.business.some(constraint => constraint.trim());
       default:
         return true;
+    }
+  };
+
+  const generatePDF = () => {
+    try {
+      const doc = new jsPDF();
+      let yPosition = 20;
+      
+      // Title
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text('Software Requirements Specification', 20, yPosition);
+      yPosition += 15;
+      
+      // Project Information
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('1. Project Information', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      
+      if (srsData.projectInfo.name) {
+        doc.text(`Project Name: ${srsData.projectInfo.name}`, 20, yPosition);
+        yPosition += 8;
+      }
+      
+      if (srsData.projectInfo.version) {
+        doc.text(`Version: ${srsData.projectInfo.version}`, 20, yPosition);
+        yPosition += 8;
+      }
+      
+      if (srsData.projectInfo.description) {
+        const descLines = doc.splitTextToSize(`Description: ${srsData.projectInfo.description}`, 170);
+        doc.text(descLines, 20, yPosition);
+        yPosition += descLines.length * 6 + 5;
+      }
+      
+      if (srsData.projectInfo.scope) {
+        const scopeLines = doc.splitTextToSize(`Scope: ${srsData.projectInfo.scope}`, 170);
+        doc.text(scopeLines, 20, yPosition);
+        yPosition += scopeLines.length * 6 + 10;
+      }
+      
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      // Functional Requirements
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('2. Functional Requirements', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      
+      if (srsData.functionalRequirements.userStories.some(story => story.trim())) {
+        doc.text('User Stories:', 20, yPosition);
+        yPosition += 6;
+        srsData.functionalRequirements.userStories.forEach((story, index) => {
+          if (story.trim()) {
+            const storyLines = doc.splitTextToSize(`• ${story}`, 165);
+            doc.text(storyLines, 25, yPosition);
+            yPosition += storyLines.length * 6;
+          }
+        });
+        yPosition += 5;
+      }
+      
+      if (srsData.functionalRequirements.systemFeatures.some(feature => feature.trim())) {
+        doc.text('System Features:', 20, yPosition);
+        yPosition += 6;
+        srsData.functionalRequirements.systemFeatures.forEach((feature, index) => {
+          if (feature.trim()) {
+            const featureLines = doc.splitTextToSize(`• ${feature}`, 165);
+            doc.text(featureLines, 25, yPosition);
+            yPosition += featureLines.length * 6;
+          }
+        });
+        yPosition += 10;
+      }
+      
+      // Check if we need a new page
+      if (yPosition > 220) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      
+      // Non-Functional Requirements
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text('3. Non-Functional Requirements', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      
+      const nfrSections = [
+        { key: 'performance', title: 'Performance' },
+        { key: 'security', title: 'Security' },
+        { key: 'usability', title: 'Usability' },
+        { key: 'reliability', title: 'Reliability' },
+        { key: 'scalability', title: 'Scalability' }
+      ];
+      
+      nfrSections.forEach(section => {
+        const value = srsData.nonFunctionalRequirements[section.key as keyof typeof srsData.nonFunctionalRequirements];
+        if (value) {
+          doc.setFont(undefined, 'bold');
+          doc.text(`${section.title}:`, 20, yPosition);
+          yPosition += 6;
+          doc.setFont(undefined, 'normal');
+          const lines = doc.splitTextToSize(value, 170);
+          doc.text(lines, 20, yPosition);
+          yPosition += lines.length * 6 + 5;
+          
+          // Check if we need a new page
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+        }
+      });
+      
+      // System Architecture
+      if (srsData.systemArchitecture.overview || srsData.systemArchitecture.dataFlow) {
+        if (yPosition > 200) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text('4. System Architecture', 20, yPosition);
+        yPosition += 10;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        
+        if (srsData.systemArchitecture.overview) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Overview:', 20, yPosition);
+          yPosition += 6;
+          doc.setFont(undefined, 'normal');
+          const overviewLines = doc.splitTextToSize(srsData.systemArchitecture.overview, 170);
+          doc.text(overviewLines, 20, yPosition);
+          yPosition += overviewLines.length * 6 + 5;
+        }
+        
+        if (srsData.systemArchitecture.dataFlow) {
+          doc.setFont(undefined, 'bold');
+          doc.text('Data Flow:', 20, yPosition);
+          yPosition += 6;
+          doc.setFont(undefined, 'normal');
+          const dataFlowLines = doc.splitTextToSize(srsData.systemArchitecture.dataFlow, 170);
+          doc.text(dataFlowLines, 20, yPosition);
+          yPosition += dataFlowLines.length * 6 + 5;
+        }
+      }
+      
+      // Save the PDF
+      const fileName = srsData.projectInfo.name ? 
+        `${srsData.projectInfo.name.replace(/[^a-z0-9]/gi, '_')}_SRS.pdf` : 
+        'SRS_Document.pdf';
+      
+      doc.save(fileName);
+      
+      toast({
+        title: "PDF Generated Successfully!",
+        description: `Your SRS document has been downloaded as ${fileName}`,
+      });
+      
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -473,12 +657,7 @@ const Index = () => {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => {
-                          toast({
-                            title: "SRS Generated!",
-                            description: "Your Software Requirements Specification has been generated successfully."
-                          });
-                        }}
+                        onClick={generatePDF}
                         className="flex items-center space-x-2 bg-green-600 hover:bg-green-700"
                       >
                         <Download className="w-4 h-4" />
