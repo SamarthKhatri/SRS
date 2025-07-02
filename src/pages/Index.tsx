@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -177,163 +178,379 @@ const Index = () => {
   const generatePDF = () => {
     try {
       const doc = new jsPDF();
-      let yPosition = 20;
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      let yPosition = 40;
       
-      // Title
-      doc.setFontSize(20);
+      // Company branding function
+      const addHeader = (pageNumber: number) => {
+        // Company name at top of every page
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text('SRS Generator Pro', pageWidth - margin, 15, { align: 'right' });
+        
+        // Page number
+        if (pageNumber > 1) {
+          doc.text(`Page ${pageNumber}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+        }
+        
+        // Horizontal line under header
+        doc.setDrawColor(200, 200, 200);
+        doc.setLineWidth(0.5);
+        doc.line(margin, 25, pageWidth - margin, 25);
+      };
+      
+      // Add header to first page
+      addHeader(1);
+      let currentPage = 1;
+      
+      // Main title - centered and prominent
+      doc.setFontSize(24);
       doc.setFont(undefined, 'bold');
-      doc.text('Software Requirements Specification', 20, yPosition);
+      doc.setTextColor(0, 0, 0);
+      doc.text('Software Requirements Specification', pageWidth / 2, yPosition, { align: 'center' });
+      yPosition += 10;
+      
+      // Project name subtitle - centered
+      if (srsData.projectInfo.name) {
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(60, 60, 60);
+        doc.text(`Project: ${srsData.projectInfo.name}`, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+      }
+      
+      // Decorative line
+      doc.setDrawColor(66, 139, 202);
+      doc.setLineWidth(2);
+      doc.line(margin + 50, yPosition, pageWidth - margin - 50, yPosition);
+      yPosition += 25;
+      
+      // Function to add new page with header
+      const addNewPage = () => {
+        doc.addPage();
+        currentPage++;
+        addHeader(currentPage);
+        yPosition = 40;
+      };
+      
+      // Function to check if we need a new page
+      const checkPageSpace = (requiredSpace: number) => {
+        if (yPosition + requiredSpace > pageHeight - 40) {
+          addNewPage();
+        }
+      };
+      
+      // Section 1: Project Information
+      checkPageSpace(60);
+      doc.setFontSize(18);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(66, 139, 202); // Blue color for headings
+      doc.text('1. Project Information', margin, yPosition);
       yPosition += 15;
       
-      // Project Information
-      doc.setFontSize(16);
-      doc.setFont(undefined, 'bold');
-      doc.text('1. Project Information', 20, yPosition);
-      yPosition += 10;
+      // Add blue underline for section
+      doc.setDrawColor(66, 139, 202);
+      doc.setLineWidth(1);
+      doc.line(margin, yPosition - 5, margin + 60, yPosition - 5);
       
       doc.setFontSize(12);
       doc.setFont(undefined, 'normal');
+      doc.setTextColor(0, 0, 0);
       
       if (srsData.projectInfo.name) {
-        doc.text(`Project Name: ${srsData.projectInfo.name}`, 20, yPosition);
-        yPosition += 8;
+        doc.setFont(undefined, 'bold');
+        doc.text('Project Name:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(srsData.projectInfo.name, margin + 35, yPosition);
+        yPosition += 10;
       }
       
       if (srsData.projectInfo.version) {
-        doc.text(`Version: ${srsData.projectInfo.version}`, 20, yPosition);
-        yPosition += 8;
+        doc.setFont(undefined, 'bold');
+        doc.text('Version:', margin, yPosition);
+        doc.setFont(undefined, 'normal');
+        doc.text(srsData.projectInfo.version, margin + 25, yPosition);
+        yPosition += 10;
       }
       
       if (srsData.projectInfo.description) {
-        const descLines = doc.splitTextToSize(`Description: ${srsData.projectInfo.description}`, 170);
-        doc.text(descLines, 20, yPosition);
+        doc.setFont(undefined, 'bold');
+        doc.text('Description:', margin, yPosition);
+        yPosition += 8;
+        doc.setFont(undefined, 'normal');
+        const descLines = doc.splitTextToSize(srsData.projectInfo.description, pageWidth - 2 * margin);
+        doc.text(descLines, margin, yPosition);
         yPosition += descLines.length * 6 + 5;
       }
       
+      if (srsData.projectInfo.stakeholders) {
+        checkPageSpace(30);
+        doc.setFont(undefined, 'bold');
+        doc.text('Stakeholders:', margin, yPosition);
+        yPosition += 8;
+        doc.setFont(undefined, 'normal');
+        const stakeholderLines = doc.splitTextToSize(srsData.projectInfo.stakeholders, pageWidth - 2 * margin);
+        doc.text(stakeholderLines, margin, yPosition);
+        yPosition += stakeholderLines.length * 6 + 5;
+      }
+      
       if (srsData.projectInfo.scope) {
-        const scopeLines = doc.splitTextToSize(`Scope: ${srsData.projectInfo.scope}`, 170);
-        doc.text(scopeLines, 20, yPosition);
-        yPosition += scopeLines.length * 6 + 10;
+        checkPageSpace(30);
+        doc.setFont(undefined, 'bold');
+        doc.text('Scope:', margin, yPosition);
+        yPosition += 8;
+        doc.setFont(undefined, 'normal');
+        const scopeLines = doc.splitTextToSize(srsData.projectInfo.scope, pageWidth - 2 * margin);
+        doc.text(scopeLines, margin, yPosition);
+        yPosition += scopeLines.length * 6 + 15;
       }
       
-      // Check if we need a new page
-      if (yPosition > 250) {
-        doc.addPage();
-        yPosition = 20;
-      }
-      
-      // Functional Requirements
-      doc.setFontSize(16);
+      // Section 2: Functional Requirements
+      checkPageSpace(60);
+      doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.text('2. Functional Requirements', 20, yPosition);
-      yPosition += 10;
+      doc.setTextColor(66, 139, 202);
+      doc.text('2. Functional Requirements', margin, yPosition);
+      yPosition += 15;
+      
+      // Add blue underline
+      doc.setDrawColor(66, 139, 202);
+      doc.line(margin, yPosition - 5, margin + 80, yPosition - 5);
       
       doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
+      doc.setTextColor(0, 0, 0);
       
       if (srsData.functionalRequirements.userStories.some(story => story.trim())) {
-        doc.text('User Stories:', 20, yPosition);
-        yPosition += 6;
-        srsData.functionalRequirements.userStories.forEach((story, index) => {
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202);
+        doc.text('User Stories:', margin, yPosition);
+        yPosition += 8;
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'normal');
+        
+        srsData.functionalRequirements.userStories.forEach((story) => {
           if (story.trim()) {
-            const storyLines = doc.splitTextToSize(`• ${story}`, 165);
-            doc.text(storyLines, 25, yPosition);
-            yPosition += storyLines.length * 6;
+            checkPageSpace(15);
+            const storyLines = doc.splitTextToSize(`• ${story}`, pageWidth - 2 * margin - 10);
+            doc.text(storyLines, margin + 5, yPosition);
+            yPosition += storyLines.length * 6 + 3;
           }
         });
         yPosition += 5;
       }
       
       if (srsData.functionalRequirements.systemFeatures.some(feature => feature.trim())) {
-        doc.text('System Features:', 20, yPosition);
-        yPosition += 6;
-        srsData.functionalRequirements.systemFeatures.forEach((feature, index) => {
+        checkPageSpace(20);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202);
+        doc.text('System Features:', margin, yPosition);
+        yPosition += 8;
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'normal');
+        
+        srsData.functionalRequirements.systemFeatures.forEach((feature) => {
           if (feature.trim()) {
-            const featureLines = doc.splitTextToSize(`• ${feature}`, 165);
-            doc.text(featureLines, 25, yPosition);
-            yPosition += featureLines.length * 6;
+            checkPageSpace(15);
+            const featureLines = doc.splitTextToSize(`• ${feature}`, pageWidth - 2 * margin - 10);
+            doc.text(featureLines, margin + 5, yPosition);
+            yPosition += featureLines.length * 6 + 3;
+          }
+        });
+        yPosition += 5;
+      }
+      
+      if (srsData.functionalRequirements.businessRules.some(rule => rule.trim())) {
+        checkPageSpace(20);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202);
+        doc.text('Business Rules:', margin, yPosition);
+        yPosition += 8;
+        doc.setTextColor(0, 0, 0);
+        doc.setFont(undefined, 'normal');
+        
+        srsData.functionalRequirements.businessRules.forEach((rule) => {
+          if (rule.trim()) {
+            checkPageSpace(15);
+            const ruleLines = doc.splitTextToSize(`• ${rule}`, pageWidth - 2 * margin - 10);
+            doc.text(ruleLines, margin + 5, yPosition);
+            yPosition += ruleLines.length * 6 + 3;
           }
         });
         yPosition += 10;
       }
       
-      // Check if we need a new page
-      if (yPosition > 220) {
-        doc.addPage();
-        yPosition = 20;
-      }
-      
-      // Non-Functional Requirements
-      doc.setFontSize(16);
+      // Section 3: Non-Functional Requirements
+      checkPageSpace(60);
+      doc.setFontSize(18);
       doc.setFont(undefined, 'bold');
-      doc.text('3. Non-Functional Requirements', 20, yPosition);
-      yPosition += 10;
+      doc.setTextColor(66, 139, 202);
+      doc.text('3. Non-Functional Requirements', margin, yPosition);
+      yPosition += 15;
+      
+      // Add blue underline
+      doc.setDrawColor(66, 139, 202);
+      doc.line(margin, yPosition - 5, margin + 90, yPosition - 5);
       
       doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
+      doc.setTextColor(0, 0, 0);
       
       const nfrSections = [
-        { key: 'performance', title: 'Performance' },
-        { key: 'security', title: 'Security' },
-        { key: 'usability', title: 'Usability' },
-        { key: 'reliability', title: 'Reliability' },
-        { key: 'scalability', title: 'Scalability' }
+        { key: 'performance', title: 'Performance Requirements' },
+        { key: 'security', title: 'Security Requirements' },
+        { key: 'usability', title: 'Usability Requirements' },
+        { key: 'reliability', title: 'Reliability Requirements' },
+        { key: 'scalability', title: 'Scalability Requirements' }
       ];
       
       nfrSections.forEach(section => {
         const value = srsData.nonFunctionalRequirements[section.key as keyof typeof srsData.nonFunctionalRequirements];
         if (value) {
+          checkPageSpace(25);
           doc.setFont(undefined, 'bold');
-          doc.text(`${section.title}:`, 20, yPosition);
-          yPosition += 6;
+          doc.setTextColor(66, 139, 202);
+          doc.text(`${section.title}:`, margin, yPosition);
+          yPosition += 8;
           doc.setFont(undefined, 'normal');
-          const lines = doc.splitTextToSize(value, 170);
-          doc.text(lines, 20, yPosition);
-          yPosition += lines.length * 6 + 5;
-          
-          // Check if we need a new page
-          if (yPosition > 250) {
-            doc.addPage();
-            yPosition = 20;
-          }
+          doc.setTextColor(0, 0, 0);
+          const lines = doc.splitTextToSize(value, pageWidth - 2 * margin);
+          doc.text(lines, margin, yPosition);
+          yPosition += lines.length * 6 + 8;
         }
       });
       
-      // System Architecture
+      // Section 4: System Architecture
       if (srsData.systemArchitecture.overview || srsData.systemArchitecture.dataFlow) {
-        if (yPosition > 200) {
-          doc.addPage();
-          yPosition = 20;
-        }
-        
-        doc.setFontSize(16);
+        checkPageSpace(60);
+        doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
-        doc.text('4. System Architecture', 20, yPosition);
-        yPosition += 10;
+        doc.setTextColor(66, 139, 202);
+        doc.text('4. System Architecture', margin, yPosition);
+        yPosition += 15;
+        
+        // Add blue underline
+        doc.setDrawColor(66, 139, 202);
+        doc.line(margin, yPosition - 5, margin + 70, yPosition - 5);
         
         doc.setFontSize(12);
-        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
         
         if (srsData.systemArchitecture.overview) {
           doc.setFont(undefined, 'bold');
-          doc.text('Overview:', 20, yPosition);
-          yPosition += 6;
+          doc.setTextColor(66, 139, 202);
+          doc.text('Architecture Overview:', margin, yPosition);
+          yPosition += 8;
           doc.setFont(undefined, 'normal');
-          const overviewLines = doc.splitTextToSize(srsData.systemArchitecture.overview, 170);
-          doc.text(overviewLines, 20, yPosition);
-          yPosition += overviewLines.length * 6 + 5;
+          doc.setTextColor(0, 0, 0);
+          const overviewLines = doc.splitTextToSize(srsData.systemArchitecture.overview, pageWidth - 2 * margin);
+          doc.text(overviewLines, margin, yPosition);
+          yPosition += overviewLines.length * 6 + 8;
+        }
+        
+        if (srsData.systemArchitecture.components.some(comp => comp.trim())) {
+          checkPageSpace(20);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(66, 139, 202);
+          doc.text('System Components:', margin, yPosition);
+          yPosition += 8;
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(0, 0, 0);
+          
+          srsData.systemArchitecture.components.forEach((component) => {
+            if (component.trim()) {
+              checkPageSpace(10);
+              const compLines = doc.splitTextToSize(`• ${component}`, pageWidth - 2 * margin - 10);
+              doc.text(compLines, margin + 5, yPosition);
+              yPosition += compLines.length * 6 + 3;
+            }
+          });
+          yPosition += 5;
         }
         
         if (srsData.systemArchitecture.dataFlow) {
+          checkPageSpace(20);
           doc.setFont(undefined, 'bold');
-          doc.text('Data Flow:', 20, yPosition);
-          yPosition += 6;
+          doc.setTextColor(66, 139, 202);
+          doc.text('Data Flow:', margin, yPosition);
+          yPosition += 8;
           doc.setFont(undefined, 'normal');
-          const dataFlowLines = doc.splitTextToSize(srsData.systemArchitecture.dataFlow, 170);
-          doc.text(dataFlowLines, 20, yPosition);
-          yPosition += dataFlowLines.length * 6 + 5;
+          doc.setTextColor(0, 0, 0);
+          const dataFlowLines = doc.splitTextToSize(srsData.systemArchitecture.dataFlow, pageWidth - 2 * margin);
+          doc.text(dataFlowLines, margin, yPosition);
+          yPosition += dataFlowLines.length * 6 + 8;
+        }
+        
+        if (srsData.systemArchitecture.interfaces) {
+          checkPageSpace(20);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(66, 139, 202);
+          doc.text('External Interfaces:', margin, yPosition);
+          yPosition += 8;
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(0, 0, 0);
+          const interfaceLines = doc.splitTextToSize(srsData.systemArchitecture.interfaces, pageWidth - 2 * margin);
+          doc.text(interfaceLines, margin, yPosition);
+          yPosition += interfaceLines.length * 6 + 8;
         }
       }
+      
+      // Section 5: Constraints & Dependencies
+      const hasConstraints = srsData.constraints.technical.some(c => c.trim()) || 
+                           srsData.constraints.business.some(c => c.trim()) || 
+                           srsData.constraints.regulatory.some(c => c.trim());
+      
+      if (hasConstraints) {
+        checkPageSpace(60);
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(66, 139, 202);
+        doc.text('5. Constraints & Dependencies', margin, yPosition);
+        yPosition += 15;
+        
+        // Add blue underline
+        doc.setDrawColor(66, 139, 202);
+        doc.line(margin, yPosition - 5, margin + 85, yPosition - 5);
+        
+        doc.setFontSize(12);
+        doc.setTextColor(0, 0, 0);
+        
+        const constraintSections = [
+          { key: 'technical', title: 'Technical Constraints' },
+          { key: 'business', title: 'Business Constraints' },
+          { key: 'regulatory', title: 'Regulatory Constraints' }
+        ];
+        
+        constraintSections.forEach(section => {
+          const constraints = srsData.constraints[section.key as keyof typeof srsData.constraints];
+          if (constraints.some((constraint: string) => constraint.trim())) {
+            checkPageSpace(20);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(66, 139, 202);
+            doc.text(`${section.title}:`, margin, yPosition);
+            yPosition += 8;
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(0, 0, 0);
+            
+            constraints.forEach((constraint: string) => {
+              if (constraint.trim()) {
+                checkPageSpace(10);
+                const constraintLines = doc.splitTextToSize(`• ${constraint}`, pageWidth - 2 * margin - 10);
+                doc.text(constraintLines, margin + 5, yPosition);
+                yPosition += constraintLines.length * 6 + 3;
+              }
+            });
+            yPosition += 5;
+          }
+        });
+      }
+      
+      // Footer on last page
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Generated by SRS Generator Pro', pageWidth / 2, pageHeight - 15, { align: 'center' });
+      doc.text(new Date().toLocaleDateString(), pageWidth / 2, pageHeight - 5, { align: 'center' });
       
       // Save the PDF
       const fileName = srsData.projectInfo.name ? 
@@ -343,8 +560,8 @@ const Index = () => {
       doc.save(fileName);
       
       toast({
-        title: "PDF Generated Successfully!",
-        description: `Your SRS document has been downloaded as ${fileName}`,
+        title: "Professional SRS Generated!",
+        description: `Your enhanced SRS document has been downloaded as ${fileName}`,
       });
       
     } catch (error) {
