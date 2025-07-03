@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -257,11 +256,6 @@ const Index = () => {
       doc.text('1. Project Information', margin, yPosition);
       yPosition += 15;
       
-      // Add blue underline for section
-      doc.setDrawColor(66, 139, 202);
-      doc.setLineWidth(1);
-      doc.line(margin, yPosition - 5, margin + 60, yPosition - 5);
-      
       doc.setFontSize(12);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(0, 0, 0);
@@ -342,10 +336,6 @@ const Index = () => {
       doc.text('2. Functional Requirements', margin, yPosition);
       yPosition += 15;
       
-      // Add blue underline
-      doc.setDrawColor(66, 139, 202);
-      doc.line(margin, yPosition - 5, margin + 80, yPosition - 5);
-      
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
@@ -416,10 +406,6 @@ const Index = () => {
       doc.text('3. Non-Functional Requirements', margin, yPosition);
       yPosition += 15;
       
-      // Add blue underline
-      doc.setDrawColor(66, 139, 202);
-      doc.line(margin, yPosition - 5, margin + 90, yPosition - 5);
-      
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       
@@ -455,10 +441,6 @@ const Index = () => {
         doc.setTextColor(0, 0, 0); // Main headings in black
         doc.text('4. System Architecture', margin, yPosition);
         yPosition += 15;
-        
-        // Add blue underline
-        doc.setDrawColor(66, 139, 202);
-        doc.line(margin, yPosition - 5, margin + 70, yPosition - 5);
         
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
@@ -534,10 +516,6 @@ const Index = () => {
         doc.setTextColor(0, 0, 0); // Main headings in black
         doc.text('5. Constraints & Dependencies', margin, yPosition);
         yPosition += 15;
-        
-        // Add blue underline
-        doc.setDrawColor(66, 139, 202);
-        doc.line(margin, yPosition - 5, margin + 85, yPosition - 5);
         
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
