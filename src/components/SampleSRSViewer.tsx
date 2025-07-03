@@ -26,11 +26,18 @@ const SampleSRSViewer: React.FC<SampleSRSViewerProps> = ({ isOpen, onClose, exam
     const margin = 20;
     let yPosition = margin;
 
-    // Company Header
+    // Company Header at top right with line
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.text('TechCorp Solutions Ltd.', pageWidth / 2, yPosition, { align: 'center' });
-    yPosition += 20;
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('TechCorp Solutions Ltd.', pageWidth - margin, 15, { align: 'right' });
+    
+    // Horizontal line below company name
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.line(margin, 25, pageWidth - margin, 25);
+    
+    yPosition = 35;
 
     // Title
     doc.setFontSize(20);
@@ -63,7 +70,17 @@ const SampleSRSViewer: React.FC<SampleSRSViewerProps> = ({ isOpen, onClose, exam
     // Check if we need a new page
     if (yPosition > pageHeight - 40) {
       doc.addPage();
-      yPosition = margin;
+      
+      // Add company header to new page
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text('TechCorp Solutions Ltd.', pageWidth - margin, 15, { align: 'right' });
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 25, pageWidth - margin, 25);
+      
+      yPosition = 35;
     }
 
     // 1. Introduction
@@ -103,7 +120,17 @@ const SampleSRSViewer: React.FC<SampleSRSViewerProps> = ({ isOpen, onClose, exam
     // Check if we need a new page
     if (yPosition > pageHeight - 60) {
       doc.addPage();
-      yPosition = margin;
+      
+      // Add company header to new page
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text('TechCorp Solutions Ltd.', pageWidth - margin, 15, { align: 'right' });
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(0.5);
+      doc.line(margin, 25, pageWidth - margin, 25);
+      
+      yPosition = 35;
     }
 
     // 2. Overall Description
@@ -137,7 +164,17 @@ const SampleSRSViewer: React.FC<SampleSRSViewerProps> = ({ isOpen, onClose, exam
     example.features.forEach((feature, index) => {
       if (yPosition > pageHeight - 40) {
         doc.addPage();
-        yPosition = margin;
+        
+        // Add company header to new page
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('TechCorp Solutions Ltd.', pageWidth - margin, 15, { align: 'right' });
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.line(margin, 25, pageWidth - margin, 25);
+        
+        yPosition = 35;
       }
 
       doc.setFont('helvetica', 'bold');
@@ -186,8 +223,14 @@ const SampleSRSViewer: React.FC<SampleSRSViewerProps> = ({ isOpen, onClose, exam
         <div className="space-y-6">
           {/* PDF Preview Content */}
           <div className="bg-white border rounded-lg p-6 shadow-sm">
+            <div className="flex justify-end mb-4">
+              <div className="text-right">
+                <h1 className="text-lg font-bold">TechCorp Solutions Ltd.</h1>
+                <hr className="mt-2 border-gray-400" />
+              </div>
+            </div>
+            
             <div className="text-center mb-8">
-              <h1 className="text-2xl font-bold mb-2">TechCorp Solutions Ltd.</h1>
               <h2 className="text-xl font-semibold">{example.title}</h2>
               <p className="text-gray-600 mt-2">Software Requirements Specification</p>
             </div>
