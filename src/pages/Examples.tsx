@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,9 +15,12 @@ import {
   Calendar,
   MessageSquare
 } from 'lucide-react';
+import SampleSRSViewer from '@/components/SampleSRSViewer';
 
 const Examples = () => {
   const navigate = useNavigate();
+  const [selectedExample, setSelectedExample] = useState<any>(null);
+  const [isViewerOpen, setIsViewerOpen] = useState(false);
 
   const examples = [
     {
@@ -83,6 +86,16 @@ const Examples = () => {
       case 'Low': return 'bg-green-100 text-green-700 border-green-200';
       default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
+  };
+
+  const handleViewSample = (example: any) => {
+    setSelectedExample(example);
+    setIsViewerOpen(true);
+  };
+
+  const handleCloseViewer = () => {
+    setIsViewerOpen(false);
+    setSelectedExample(null);
   };
 
   return (
@@ -186,7 +199,12 @@ const Examples = () => {
                   
                   <div className="flex items-center justify-between pt-2 border-t">
                     <span className="text-sm text-gray-500">{example.pages}</span>
-                    <Button size="sm" variant="outline" className="text-xs">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs"
+                      onClick={() => handleViewSample(example)}
+                    >
                       <ExternalLink className="w-3 h-3 mr-1" />
                       View Sample
                     </Button>
@@ -214,6 +232,15 @@ const Examples = () => {
           </Button>
         </div>
       </div>
+
+      {/* Sample SRS Viewer */}
+      {selectedExample && (
+        <SampleSRSViewer
+          isOpen={isViewerOpen}
+          onClose={handleCloseViewer}
+          example={selectedExample}
+        />
+      )}
     </div>
   );
 };
